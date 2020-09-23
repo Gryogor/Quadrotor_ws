@@ -11,7 +11,6 @@ geometry_msgs::Point robot_position;
 geometry_msgs::Point goal_position;
 float robot_orientation;
 
-
 void odomcallback(nav_msgs::Odometry msg)
 {
   robot_position = msg.pose.pose.position;
@@ -22,13 +21,18 @@ void odomcallback(nav_msgs::Odometry msg)
   robot_orientation = yaw;
 }
 
+float angular_controller(float angle)
+{
+  float speed = -0.5 + (0.5 - -0.5) * ((angle - -M_PI/2) / (M_PI/2 - -M_PI/2));
+}
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "Goal_Navigation");
   ros::NodeHandle _nh;
   ros::Publisher move_pub = _nh.advertise<geometry_msgs::Twist>("cmd_vel",1);
   ros::Subscriber sub = _nh.subscribe("odom", 1, odomcallback);
-  ros::Rate sleep_rate(5);
+  ros::Rate sleep_rate(50);
   std::cout << "Please enter x and y coordinates of the goal:" << std::endl;
   std:: cout << "x: ";
   std::cin >> goal_position.x;
@@ -40,9 +44,12 @@ int main(int argc, char **argv)
   while(ros::ok())
   {
     ros::spinOnce();
-    float orientation_to_goal = atan2(goal_position.y-robot_position.y, goal_position.x-robot_position.x);
-    std::cout << "Orientation to goal: " << orientation_to_goal << std::endl;
-    std::cout << "Robot orientation: " << robot_orientation << std::endl;
+    geometry_msgs::Twist speeds;
+    float orientation_to_goal = atan2(goal_position.y-robot_position.y, goal_position.x-robot_position.x) - robot_orientation;
+
+    speeds.angular.z = angular_controller(orientation_to_goal);
+    move_pub.publish(speeds);
+
     sleep_rate.sleep();
   }
   return 0;
