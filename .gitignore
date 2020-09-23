@@ -2,3 +2,6 @@ build/
 devel/
 logs/
 install/
+.vscode/
+ROS_WS.code-workspace
+.catkin_tools/
