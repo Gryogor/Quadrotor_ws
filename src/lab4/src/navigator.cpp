@@ -11,6 +11,10 @@ geometry_msgs::Point robot_position;
 geometry_msgs::Point goal_position;
 float robot_orientation;
 
+float remap(float value, float istart, float istop, float ostart, float ostop) {
+	return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
+}
+
 void odomcallback(nav_msgs::Odometry msg)
 {
   robot_position = msg.pose.pose.position;
@@ -23,7 +27,19 @@ void odomcallback(nav_msgs::Odometry msg)
 
 float angular_controller(float angle)
 {
-  float speed = -0.5 + (0.5 - -0.5) * ((angle - -M_PI/2) / (M_PI/2 - -M_PI/2));
+  return remap(angle, -M_PI, M_PI, -1, 1);
+}
+float linear_controller(float distance)
+{
+  if (distance < 3.0)
+  {
+    return remap(distance, 0, 3.0, 0, 0.1);
+  }
+  else
+  {
+    return 0.1;
+  }
+  
 }
 
 int main(int argc, char **argv)
@@ -46,8 +62,21 @@ int main(int argc, char **argv)
     ros::spinOnce();
     geometry_msgs::Twist speeds;
     float orientation_to_goal = atan2(goal_position.y-robot_position.y, goal_position.x-robot_position.x) - robot_orientation;
-
+    if (abs(orientation_to_goal) > M_PI)
+    {
+      if (orientation_to_goal > 0)
+      {
+        orientation_to_goal = -2*M_PI + orientation_to_goal;
+      }
+      else
+      {
+        orientation_to_goal = 2*M_PI + orientation_to_goal;
+      }
+      
+    }
+    std::cout << orientation_to_goal << std::endl;
     speeds.angular.z = angular_controller(orientation_to_goal);
+    speeds.linear.x = linear_controller(abs(sqrt(pow(goal_position.y-robot_position.y,2)+pow(goal_position.x-robot_position.x,2))));
     move_pub.publish(speeds);
 
     sleep_rate.sleep();
