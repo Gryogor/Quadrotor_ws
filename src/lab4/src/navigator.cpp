@@ -62,7 +62,7 @@ int main(int argc, char **argv)
     ros::spinOnce();
     geometry_msgs::Twist speeds;
     float orientation_to_goal = atan2(goal_position.y-robot_position.y, goal_position.x-robot_position.x) - robot_orientation;
-    if (abs(orientation_to_goal) > M_PI)
+    if (fabs(orientation_to_goal) > M_PI)
     {
       if (orientation_to_goal > 0)
       {
@@ -74,9 +74,9 @@ int main(int argc, char **argv)
       }
       
     }
-    std::cout << orientation_to_goal << std::endl;
+    std::cout << abs(orientation_to_goal) << std::endl; //I don't know why, but abs also works with floats
     speeds.angular.z = angular_controller(orientation_to_goal);
-    speeds.linear.x = linear_controller(abs(sqrt(pow(goal_position.y-robot_position.y,2)+pow(goal_position.x-robot_position.x,2))));
+    speeds.linear.x = linear_controller(fabs(sqrt(pow(goal_position.y-robot_position.y,2)+pow(goal_position.x-robot_position.x,2))));
     move_pub.publish(speeds);
 
     sleep_rate.sleep();

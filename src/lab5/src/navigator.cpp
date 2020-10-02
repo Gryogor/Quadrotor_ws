@@ -72,12 +72,12 @@ int main(int argc, char **argv)
     ros::spinOnce();
     geometry_msgs::Twist speeds;
     float orientation_to_goal = atan2(goal_position.y-robot_position.y, goal_position.x-robot_position.x) - robot_orientation;
-    distance_to_goal = abs(sqrt(pow(goal_position.y-robot_position.y,2)+pow(goal_position.x-robot_position.x,2)));
+    distance_to_goal = fabs(sqrt(pow(goal_position.y-robot_position.y,2)+pow(goal_position.x-robot_position.x,2)));
     if (distance_to_goal < 0.05)
     {
       orientation_to_goal = goal_orientation - robot_orientation;
     }
-    if (abs(orientation_to_goal) > M_PI)
+    if (fabs(orientation_to_goal) > M_PI)
     {
       if (orientation_to_goal > 0)
       {

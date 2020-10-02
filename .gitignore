@@ -5,3 +5,4 @@ install/
 .vscode/
 ROS_WS.code-workspace
 .catkin_tools/
+mir_robot/
