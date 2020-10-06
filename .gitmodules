@@ -7,3 +7,9 @@
 [submodule "turtlebot3_simulations"]
 	path = src/turtlebot3_simulations
 	url = https://github.com/ROBOTIS-GIT/turtlebot3_simulations
+[submodule "src/ds4drv"]
+	path = src/ds4drv
+	url = https://github.com/naoki-mizuno/ds4drv
+[submodule "src/ds4_driver"]
+	path = src/ds4_driver
+	url = https://github.com/naoki-mizuno/ds4_driver.git
