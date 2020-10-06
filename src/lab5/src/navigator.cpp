@@ -13,6 +13,7 @@ geometry_msgs::Point goal_position;
 float robot_orientation;
 float goal_orientation;
 float distance_to_goal;
+float kp = 1/M_PI;
 
 float remap(float value, float istart, float istop, float ostart, float ostop) {
 	return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
@@ -41,13 +42,13 @@ void goalCallback(geometry_msgs::Pose msg)
 
 float angular_controller(float angle)
 {
-  return remap(angle, -M_PI, M_PI, -1, 1);
+  return remap(angle, -M_PI, M_PI, -M_PI*kp, M_PI*kp);
 }
 float linear_controller(float distance)
 {
-  if (distance < 3.0)
+  if (distance < 1.0)
   {
-    return remap(distance, 0, 3.0, 0, 0.1);
+    return remap(distance, 0, 1.0, 0, 0.1);
   }
   else
   {
