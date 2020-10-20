@@ -13,3 +13,9 @@
 [submodule "src/ds4_driver"]
 	path = src/ds4_driver
 	url = https://github.com/naoki-mizuno/ds4_driver.git
+[submodule "src/usb_cam"]
+	path = src/usb_cam
+	url = https://github.com/ros-drivers/usb_cam.git
+[submodule "src/ar_track_alvar"]
+	path = src/ar_track_alvar
+	url = https://github.com/ros-perception/ar_track_alvar.git
