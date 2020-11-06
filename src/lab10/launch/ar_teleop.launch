@@ -1,0 +1,8 @@
+<launch>
+  <arg name="model" default="waffle"/>
+  <param name="model" value="$(arg model)"/>
+
+  <!-- turtlebot3_teleop_key already has its own built in velocity smoother -->
+  <node pkg="lab10" type="ar_control" name="ar_control_keyboard"  output="screen">
+  </node>
+</launch>

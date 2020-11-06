@@ -19,3 +19,9 @@
 [submodule "src/ar_track_alvar"]
 	path = src/ar_track_alvar
 	url = https://github.com/ros-perception/ar_track_alvar.git
+[submodule "src/gazebo2rviz"]
+	path = src/gazebo2rviz
+	url = https://github.com/andreasBihlmaier/gazebo2rviz
+[submodule "src/pysdf"]
+	path = src/pysdf
+	url = https://github.com/andreasBihlmaier/pysdf
