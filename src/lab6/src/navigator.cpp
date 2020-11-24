@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "Goal_Navigation_v3");
   ros::NodeHandle _nh;
-  ros::Publisher move_pub = _nh.advertise<geometry_msgs::Twist>("cmd_vel",1);
+  ros::Publisher move_pub = _nh.advertise<geometry_msgs::Twist>("bebop/cmd_vel",1);
   ros::Subscriber sub = _nh.subscribe("odom", 1, odomcallback);
   ros::Subscriber goal_sub = _nh.subscribe("turtlebot/goal_pose", 1, goalCallback);
   ros::Rate sleep_rate(50);

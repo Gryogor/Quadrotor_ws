@@ -25,3 +25,9 @@
 [submodule "src/pysdf"]
 	path = src/pysdf
 	url = https://github.com/andreasBihlmaier/pysdf
+[submodule "src/bebop_vel_ctrl"]
+	path = src/bebop_vel_ctrl
+	url = https://github.com/AutonomyLab/bebop_vel_ctrl.git
+[submodule "src/pid"]
+	path = src/pid
+	url = https://bitbucket.org/AndyZe/pid.git

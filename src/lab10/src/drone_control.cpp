@@ -31,16 +31,40 @@ private:
   double _P_cont_linear (double target_z)
   {
     double final_speed = (target_z - 1.0)*_p_coefficent_z;
+    if (final_speed > 0.15)
+    {
+      final_speed = 0.15;
+    }
+    else if (final_speed < -0.15)
+    {
+      final_speed = -0.15;
+    }
     return final_speed;
   }
   double _P_cont_linear_step (double target_x)
   {
     double final_speed = -target_x*_p_coefficent_x;
+    if (final_speed > 0.15)
+    {
+      final_speed = 0.15;
+    }
+    else if (final_speed < -0.15)
+    {
+      final_speed = -0.15;
+    }
     return final_speed;
   }
   double _P_cont_angular (double target_or)
   {
     double final_speed = target_or*_p_coefficent_or;
+    if (final_speed > 0.15)
+    {
+      final_speed = 0.15;
+    }
+    else if (final_speed < -0.15)
+    {
+      final_speed = -0.15;
+    }
     return final_speed;
   }
 public:
@@ -64,12 +88,12 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "Drone_control");
   ros::NodeHandle _nh;
   ros::Subscriber sub_marker = _nh.subscribe("visualization_marker",1,callBack_marker);
-  pub_takeoff = _nh.advertise<std_msgs::Empty>("drone/takeoff",1);
-  ros::Publisher control_pub = _nh.advertise<geometry_msgs::Twist>("cmd_vel",1);
+  //pub_takeoff = _nh.advertise<std_msgs::Empty>("bebop/takeoff",1);
+  ros::Publisher control_pub = _nh.advertise<geometry_msgs::Twist>("bebop/cmd_vel",1);
 
   P_control p_control;
 
-  drone_prep();
+  //drone_prep();
   last_message = ros::Time::now().toSec();
 
   ros::Rate sleepRate(10);
