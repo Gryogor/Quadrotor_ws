@@ -66,7 +66,7 @@
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
-  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>ar_track_alvar_msgs</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

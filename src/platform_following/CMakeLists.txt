@@ -13,7 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   sensor_msgs
-  visualization_msgs
+  ar_track_alvar_msgs
+
 )
 
 ## System dependencies are found with CMake's conventions
@@ -207,3 +208,6 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+add_executable(robot_following src/robot_following.cpp)
+target_link_libraries(robot_following ${catkin_LIBRARIES})
