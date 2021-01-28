@@ -11,6 +11,8 @@ ros::Publisher takeoff_pub;
 ros::Publisher pub_land;
 geometry_msgs::Pose marker_pose;
 
+
+
 double marker_nav_orientation;
 double marker_nav_y;
 double marker_nav_x;
@@ -27,26 +29,39 @@ double to_wait_2 = 3.0;
 double waiting_timer_2;
 bool start_waiting_2;
 
+double landing_timer;
+
 double last_message;
 
 int cnt = 0;
-int step = 3;
-double d_speed = 0.10;
+int step = 1;
+double d_speed = 0.05;
 bool tag_found = false;
 bool timer_start = false;
-
+int cnt_movement = 30; 
 
 
 
 class P_control
 {
 private:
-  double _p_coefficent_y = 0.25;
+  double _p_coefficent_y = 0.15; //0.15
+  double _i_coefficent_y = 0.0;
+  double _d_coefficent_y = 0.0;
   double _p_coefficent_x = 0.1;
+  double _d_coefficent_x = 0.0;
   double _p_coefficent_or = 0.5;
+  double _d_coefficent_or = 10.09;
+  double i_part = 0.0;
+  double prev_target_y = 0.0;
+  double prev_target_x = 0.0;
   double _P_cont_linear (double target_y)
   {
-    double final_speed = -target_y *_p_coefficent_y;
+    double p_part = -target_y *_p_coefficent_y;
+    i_part += -target_y*0.1;
+    double d_part = ((-target_y) - (-prev_target_y))/0.1;
+    double final_speed = p_part + i_part*_i_coefficent_y + d_part*_d_coefficent_y;
+    prev_target_y = target_y;
     if (final_speed > 0.15)
     {
       final_speed = 0.15;
@@ -59,7 +74,10 @@ private:
   }
   double _P_cont_linear_step (double target_x)
   {
-    double final_speed = -target_x*_p_coefficent_x;
+    double p_part = -target_x*_p_coefficent_x;
+    double d_part = ((-target_x) - (-prev_target_x))/0.1;
+    double final_speed = p_part + d_part*_d_coefficent_x;
+    prev_target_x = target_x;
     if (final_speed > 0.15)
     {
       final_speed = 0.15;
@@ -110,6 +128,9 @@ int main(int argc, char **argv)
   ros::Publisher control_pub = _nh.advertise<geometry_msgs::Twist>("bebop/cmd_vel",1);
   ros::Publisher camera_control_pub = _nh.advertise<geometry_msgs::Twist>("bebop/camera_control",1);
 
+  ros::AsyncSpinner spinner(4); // Use 4 threads
+  spinner.start();
+
   //add change the camera angle to default one
   geometry_msgs::Twist camera_angle;
   camera_angle.angular.y = -30.0;
@@ -117,10 +138,12 @@ int main(int argc, char **argv)
 
   P_control p_control;
 
+  ros::Duration(1.0).sleep();
+
   //drone_prep();
 
-  std_msgs::Empty to_send;
-  takeoff_pub.publish(to_send);
+  std_msgs::Empty to_takeoff;
+  takeoff_pub.publish(to_takeoff);
   
   last_message = ros::Time::now().toSec();
 
@@ -167,7 +190,7 @@ int main(int argc, char **argv)
               {
                 step++;
                 std::cout << "Ready to countinue!" << std::endl;
-                to_travel = marker_find_z/d_speed/3.6;
+                to_travel = marker_find_z/d_speed/4.5;
                 movement_timer = ros::Time::now().toSec();
               }
               
@@ -193,7 +216,7 @@ int main(int argc, char **argv)
         {
           std::cout << "Time to travel: " << to_travel << std::endl;
           to_send.linear.x = d_speed;
-          to_send.linear.z = 0.1;
+          to_send.linear.z = 0.2;
 
 
           if (ros::Time::now().toSec() - movement_timer < to_travel-2)
@@ -238,15 +261,21 @@ int main(int argc, char **argv)
         else
         {
           to_send = p_control.P_controller(marker_nav_y, marker_nav_x, marker_nav_orientation); //add init for checking!!
+          if ((to_send.linear.x > 0.05) && (cnt_movement < 30))
+          {
+            cnt_movement++;
+          }
+          
           std::cout << to_send << std::endl;
-          if ((to_send.linear.x <= 0.03) && (to_send.linear.x >= -0.03) && (to_send.linear.y <= 0.03) && (to_send.linear.y >= -0.03) && (to_send.angular.z <= 0.03) && (to_send.angular.z >= -0.03))
+          if ((to_send.linear.x <= 0.03) && (to_send.linear.x >= -0.03) && (to_send.linear.y <= 0.03) && (to_send.linear.y >= -0.03) && (to_send.angular.z <= 0.03) && (to_send.angular.z >= -0.03) && (cnt_movement >= 30))
           {
             if (timer_start)
             {
               if (ros::Time::now().toSec() - waiting_timer >= to_wait)
               {
-                //step++;
+                step++;
                 std::cout << "Should be landing" << std::endl;
+                landing_timer = ros::Time::now().toSec();
               }
               
             }
@@ -264,16 +293,35 @@ int main(int argc, char **argv)
           
         }
         control_pub.publish(to_send);
+
       }
       break;
     
     case 4: //landing
+    {
+      geometry_msgs::Twist to_send;
+      double final_speed = -(marker_nav_y-0.1) * 0.1;
+      if (final_speed > 0.15)
       {
-        std_msgs::Empty t_land;
+        final_speed = 0.15;
+      }
+      else if (final_speed < -0.15)
+      {
+        final_speed = -0.15;
+      }
+      to_send.linear.x = final_speed;
+      control_pub.publish(to_send);
+
+      {
+        if (ros::Time::now().toSec() - landing_timer > 1)
+        {
+          std_msgs::Empty t_land;
         step++;
         pub_land.publish(t_land);
+        }
+        
       }
-
+    }
       break;
 
     default:
@@ -287,7 +335,7 @@ int main(int argc, char **argv)
       break;
     }
     std::cout << "Step: " << step << std::endl;
-    ros::spinOnce();
+    //ros::spinOnce();
 
   }
   return 0;
